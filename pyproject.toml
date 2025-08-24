@@ -1,0 +1,15 @@
+[project]
+name = "hireln-auto"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "langchain>=0.3.27",
+    "langchain-mcp-adapters==0.1.9",
+    "langchain-openai>=0.3.30",
+    "langgraph>=0.6.6",
+    "mcp[cli]>=1.10.1",
+    "modelcontextprotocol>=0.1.0",
+]
