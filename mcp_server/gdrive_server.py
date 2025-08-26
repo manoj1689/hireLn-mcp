@@ -131,8 +131,17 @@ async def get_file_metadata(ctx: Context[ServerSession, AppContext], file_id: st
     }
 print("✅ GDrive MCP server running on port 8001")
 # Run server with streamable_http transport
+# if __name__ == "__main__":
+#     mcp.run(transport="streamable-http")
+
+
+# --- Expose as ASGI app ---
+app = mcp.streamable_http_app()
+
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
-    
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002, reload=True)
+
+  
 #uv run mcp dev mcp_server/gdrive_server.py
 #uv run mcp_server/excelsheet_server.py

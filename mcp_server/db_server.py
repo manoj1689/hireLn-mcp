@@ -57,5 +57,13 @@ async def get_candidate_info(ctx: Context[ServerSession, dict]):
 
 
 # Run server with streamable_http transport
+# if __name__ == "__main__":
+#     mcp.run(transport="streamable-http")
+
+
+# --- Expose as ASGI app ---
+app = mcp.streamable_http_app()
+
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001, reload=True)

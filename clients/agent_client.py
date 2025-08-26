@@ -5,7 +5,8 @@ from langgraph.prebuilt import ToolNode, tools_condition
 import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import ToolMessage,HumanMessage
+from langchain_core.messages import ToolMessage, HumanMessage
+
 load_dotenv()
 os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 model = init_chat_model("openai:gpt-4o-mini")
@@ -13,19 +14,30 @@ model = init_chat_model("openai:gpt-4o-mini")
 
 async def main():
     # 1. Setup MCP client (no async with!)
+#     client = MultiServerMCPClient(
+#     {
+#         "db": {
+#             "transport": "streamable_http",
+#             "url": "http://127.0.0.1:8001/database/mcp/",
+#         },
+#         "gdrive": {
+#             "transport": "streamable_http",
+#             "url": "http://127.0.0.1:8001/google_drive/mcp/",
+#         },
+#     }
+# )
     client = MultiServerMCPClient(
     {
         "db": {
             "transport": "streamable_http",
-            "url": "http://127.0.0.1:8001/database/mcp/",
+            "url": "http://103.217.247.201/database/mcp/",
         },
         "gdrive": {
             "transport": "streamable_http",
-            "url": "http://127.0.0.1:8001/google_drive/mcp/",
+            "url": "http://103.217.247.201/google_drive/mcp/",
         },
     }
 )
-
 
     # 2. Preload tools (optional but good for debugging)
     tools = await client.get_tools()
@@ -53,14 +65,13 @@ async def main():
                 print("👋 Exiting agent...")
                 break
 
-            # Pass user input into the graph
-            agent_response = await graph.ainvoke({"messages": query})
+            # Wrap user input as a HumanMessage instead of plain str
+            agent_response = await graph.ainvoke({"messages": [HumanMessage(content=query)]})
 
             messages = agent_response.get("messages", [])
 
-            # Filter for HumanMessage
+            # Separate messages
             human_msgs = [m for m in messages if isinstance(m, HumanMessage)]
-            # Filter for ToolMessage
             tool_msgs = [m for m in messages if isinstance(m, ToolMessage)]
 
             if human_msgs:
