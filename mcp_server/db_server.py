@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from mcp.server.fastmcp import Context, FastMCP
 from mcp.server.session import ServerSession
 from mcp_server.database import Database
-
+from fastapi.middleware.cors import CORSMiddleware
 @dataclass
 class AppContext:
     """Application context with typed dependencies."""
@@ -63,6 +63,16 @@ async def get_candidate_info(ctx: Context[ServerSession, dict]):
 
 # --- Expose as ASGI app ---
 app = mcp.streamable_http_app()
+
+# Add CORS support
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # add your frontend origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 if __name__ == "__main__":
     import uvicorn

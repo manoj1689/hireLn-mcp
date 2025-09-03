@@ -22,7 +22,7 @@ async def main():
 #         },
 #         "gdrive": {
 #             "transport": "streamable_http",
-#             "url": "http://127.0.0.1:8001/google_drive/mcp/",
+#             "url": "http://127.0.0.1:8002/google_drive/mcp/",
 #         },
 #     }
 # )
@@ -30,11 +30,11 @@ async def main():
     {
         "db": {
             "transport": "streamable_http",
-            "url": "http://103.217.247.201/database/mcp/",
+            "url": "http://mcp.hireln.com/database/mcp/",
         },
         "gdrive": {
             "transport": "streamable_http",
-            "url": "http://103.217.247.201/google_drive/mcp/",
+            "url": "http://mcp.hireln.com/google_drive/mcp/",
         },
     }
 )

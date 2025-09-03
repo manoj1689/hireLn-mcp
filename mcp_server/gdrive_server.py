@@ -1,12 +1,15 @@
 """
-Example MCP server for Google Drive integration with lifespan support.
+Example MCP server for Google Drive integration with lifespan support + CORS.
 """
 
+import base64
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+import io
 import json
 import os
+import asyncio
 from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -15,10 +18,14 @@ from mcp.server.session import ServerSession
 # Google API
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseUpload
 
 # Load environment variables from a .env file
 from dotenv import load_dotenv
 load_dotenv()
+
+# FastAPI CORS
+from fastapi.middleware.cors import CORSMiddleware
 
 
 @dataclass
@@ -129,19 +136,24 @@ async def get_file_metadata(ctx: Context[ServerSession, AppContext], file_id: st
         "modified": file.get("modifiedTime"),
         "owner": file["owners"][0]["emailAddress"] if "owners" in file else "unknown",
     }
-print("✅ GDrive MCP server running on port 8001")
-# Run server with streamable_http transport
-# if __name__ == "__main__":
-#     mcp.run(transport="streamable-http")
 
 
-# --- Expose as ASGI app ---
+# --- Expose as ASGI app with CORS ---
 app = mcp.streamable_http_app()
+
+# Add CORS support
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # add your frontend origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8002, reload=True)
-
   
 #uv run mcp dev mcp_server/gdrive_server.py
 #uv run mcp_server/excelsheet_server.py

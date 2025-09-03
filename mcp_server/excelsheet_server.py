@@ -5,6 +5,8 @@ Example MCP server for Google Sheets integration with lifespan support.
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+import json
+import os
 from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
@@ -13,6 +15,10 @@ from mcp.server.session import ServerSession
 # Google API
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+
+# Load environment variables from a .env file
+from dotenv import load_dotenv
+load_dotenv()
 
 
 @dataclass
@@ -25,13 +31,14 @@ class AppContext:
 @asynccontextmanager
 async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
     """Setup Google Sheets client on startup and cleanup on shutdown."""
-
+    SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets"
+]
     # Use Service Account JSON credentials
-    creds = Credentials.from_service_account_file(
-        "hirelnresumes-85a2a49bc362.json",  # put your JSON key here
-        scopes=["https://www.googleapis.com/auth/spreadsheets"],
-    )
+    # Load credentials JSON from .env
+    creds_info = json.loads(os.getenv("GOOGLE_CREDENTIALS"))
 
+    creds = Credentials.from_service_account_info(creds_info, scopes=SCOPES)
     sheets_service = build("sheets", "v4", credentials=creds)
 
     try:
@@ -105,10 +112,13 @@ async def update_cell(ctx: Context[ServerSession, AppContext], range_: str, valu
     )
     return {"updated": result}
 
+# --- Expose as ASGI app ---
+app = mcp.streamable_http_app()
 
 if __name__ == "__main__":
-    mcp.run()
-
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8003, reload=True)
+  
 
 #uv run mcp dev mcp_server/gdrive_server.py
 #uv run mcp_server/excelsheet_server.py
